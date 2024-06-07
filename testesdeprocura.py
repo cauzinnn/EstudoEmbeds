@@ -42,6 +42,6 @@ def print_recommendations_from_strings(
 
 teste = print_recommendations_from_strings(
     df=df, 
-    index_procura=0, 
+    index_procura=5, 
     k_nearest_neighbors=10, 
 )
