@@ -9,12 +9,13 @@ def print_recommendations_from_strings(
     df,
     index_procura: int,
     k_nearest_neighbors: int = 5) -> list[int]:
+    relatedness_fn = lambda x, y: scipy.spatial.distance.cosine(x, y)
     df["embedding"] = df.embedding.apply(literal_eval).apply(np.array)
     embeddings = df["embedding"]
     distances = []
     for embedding in embeddings:
-    	a = np.dot(embeddings[index_procura], embedding)/(np.linalg.norm(embeddings[index_procura])*np.linalg.norm(embedding))
-    	distances.append(a)
+    	distancia = retatedness_fn(embeddings[index_procura], embedding)
+    	distances.append(distancia)
 
     indice_das_distancias = np.argsort(distances)
 
