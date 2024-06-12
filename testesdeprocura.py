@@ -1,21 +1,23 @@
 import pandas as pd
 import numpy as np
 from ast import literal_eval
+import scipy
 
 
 df = pd.read_csv("data/stoicism.csv")
 
+
 def print_recommendations_from_strings(
-    df,
-    index_procura: int,
-    k_nearest_neighbors: int = 5) -> list[int]:
+    df, index_procura: int, k_nearest_neighbors: int = 5
+) -> list[int]:
     relatedness_fn = lambda x, y: scipy.spatial.distance.cosine(x, y)
+
     df["embedding"] = df.embedding.apply(literal_eval).apply(np.array)
     embeddings = df["embedding"]
     distances = []
     for embedding in embeddings:
-    	distancia = retatedness_fn(embeddings[index_procura], embedding)
-    	distances.append(distancia)
+        distancia = relatedness_fn(embeddings[index_procura], embedding)
+        distances.append(distancia)
 
     indice_das_distancias = np.argsort(distances)
 
@@ -29,9 +31,7 @@ def print_recommendations_from_strings(
             break
         k_counter += 1
 
-
-
-        string_final = str(df["text"][i][:80]).replace('\n',' ')
+        string_final = str(df["text"][i][:80]).replace("\n", " ")
         print(
             f"""
         --- Recommendation #{k_counter} (nearest neighbor {k_counter} of {k_nearest_neighbors}) ---
@@ -41,8 +41,9 @@ def print_recommendations_from_strings(
 
     return indice_das_distancias
 
+
 teste = print_recommendations_from_strings(
-    df=df, 
-    index_procura=5, 
-    k_nearest_neighbors=10, 
+    df=df,
+    index_procura=5,
+    k_nearest_neighbors=10,
 )
