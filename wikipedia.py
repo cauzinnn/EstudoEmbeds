@@ -74,26 +74,6 @@ def indice_artigos_rankeados(query_embedding: list, embeddings) -> list:
 
 
 def ask(query, df, n_embeddings: int = 5) -> str:
-<<<<<<< Updated upstream
-    """Answers a query using x and a dataframe of relevant texts and embeddings."""
-    df["embedding"] = df["embedding"].apply(
-        ast.literal_eval
-    )  # voltar a usar lista ao invés de str
-    embeddings = df["embedding"]
-    query_embedding = embedding_query(query=query)
-    indices_rankeados, distancias = indice_artigos_rankeados(
-        query_embedding=query_embedding, embeddings=embeddings
-    )
-    k_counter = 0
-    strings = []
-    for i in indices_rankeados:
-        if k_counter >= n_embeddings:
-            break
-        k_counter += 1
-        string_final = str(df["text"][i][:80]).replace("\n", "")
-        strings.append(str(df["text"][i]))
-        print(
-=======
 	"""Answers a query using GPT and a dataframe of relevant texts and embeddings."""
 	embeddings = df["embedding"]
 	query_embedding = embedding_query(query=query)
@@ -106,26 +86,20 @@ def ask(query, df, n_embeddings: int = 5) -> str:
 		k_counter += 1
 		string_final = str(df["text"][i][:80]).replace("\n", "")
 		strings.append(str(df["text"][i]))
-		print(
->>>>>>> Stashed changes
-            f"""
-        --- Embedding de número #{k_counter} (o #{k_counter} mais próximo do query de {n_embeddings}) ---
+		print(f"""--- Embedding de número #{k_counter} (o #{k_counter} mais próximo do query de {n_embeddings}) ---
         Embedding: {string_final}
-        Distância: {distancias[i]:0.3f}"""
-        )
-    intro = f'Use the below articles to answer the subsequent question. If the answer cannot be found in the articles, write "I could not find an answer.". Do not answer the question if the answer cannot be found in the articles.'
-    pergunta = f"\n\nQuestion: {query}"
-    artigos = "\n\nWikipedia article section\n\n" + "\n\n".join(strings)
-    query = intro + artigos + pergunta
-    messages = [
+        Distância: {distancias[i]:0.3f}""")
+	intro = 'Use the below articles to answer the subsequent question. If the answer cannot be found in the articles, write "I could not find an answer.". Do not answer the question if the answer cannot be found in the articles.'
+	pergunta = f"\n\nQuestion: {query}"
+	artigos = "\n\nWikipedia article section\n\n" + "\n\n".join(strings)
+	query = intro + artigos + pergunta
+	messages = [
         {"role": "system", "content": "You answer questions about stoicism"},
         {"role": "user", "content": query},
     ]
-    response = client.chat.completions.create(
-        model=GPT_MODEL, messages=messages, temperature=0
-    )
-    response_message = response.choices[0].message.content
-    return response_message
+	response = client.chat.completions.create(model=GPT_MODEL, messages=messages, temperature=0)
+	response_message = response.choices[0].message.content
+	return response_message
 
 
 # comentário para gerar o .csv com os embeddings
@@ -138,18 +112,6 @@ for section in formatted_article:
 df = pd.DataFrame({"text": formatted_article, "embedding": embeddings})
 df.to_csv("data/stoicarticle.csv", index=False)"""
 
-<<<<<<< Updated upstream
-if __name__ == "__main__":
-    print(
-        "Ask any question about Stoicism! I'll be using embeddings from the wikipedia article to answer your question."
-    )
-    while True:
-        query = input("Question: ")
-        if query:
-            response = ask(query=query, df=dfstoic, n_embeddings=3)
-            print(f"\n{response}")
-        print("\nAny other questions?")
-=======
 if __name__ == '__main__':
 	print("Ask any question about Stoicism! I'll be using embeddings from the wikipedia article to answer your question.")
 	while True:
@@ -158,4 +120,3 @@ if __name__ == '__main__':
 			response = ask(query=query, df=df_stoicism, n_embeddings=3)
 			print(f"\n{response}")
 		print("\nAny other questions?")
->>>>>>> Stashed changes
