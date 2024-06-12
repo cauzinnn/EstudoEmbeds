@@ -11,7 +11,8 @@ load_dotenv()
 
 client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-dfstoic = pd.read_csv("data/stoicarticle.csv")
+df_stoicism = pd.read_csv("data/stoicarticle.csv")
+df_stoicism['embedding'] = df_stoicism['embedding'].apply(ast.literal_eval)
 
 stoicism_article = 'Stoicism is a school of Hellenistic philosophy that flourished in Ancient Greece and Ancient Rome. The Stoics believed that the practice of virtue is enough to achieve eudaimonia: a well-lived life. The Stoics identified the path to achieving it with a life spent practicing the four virtues in everyday life: wisdom, courage, temperance or moderation, and justice, and living in accordance with nature. It was founded in the ancient Agora of Athens by Zeno of Citium around 300 BC. \n\
 	Alongside Aristotle\'s ethics, the Stoic tradition forms one of the major founding approaches to virtue ethics. The Stoics are especially known for teaching that "virtue is the only good" for human beings, and that external things, such as health, wealth, and pleasure, are not good or bad in themselves (adiaphora) but have value as "material for virtue to act upon". Many Stoics—such as Seneca and Epictetus—emphasized that because "virtue is sufficient for happiness", a sage would be emotionally resilient to misfortune. The Stoics also held that certain destructive emotions resulted from errors of judgment, and they believed people should aim to maintain a will (called prohairesis) that is "in accordance with nature". Because of this, the Stoics thought the best indication of an individual\'s philosophy was not what a person said but how a person behaved. To live a good life, one had to understand the rules of the natural order since they believed everything was rooted in nature.\n\
@@ -73,6 +74,7 @@ def indice_artigos_rankeados(query_embedding: list, embeddings) -> list:
 
 
 def ask(query, df, n_embeddings: int = 5) -> str:
+<<<<<<< Updated upstream
     """Answers a query using x and a dataframe of relevant texts and embeddings."""
     df["embedding"] = df["embedding"].apply(
         ast.literal_eval
@@ -91,6 +93,21 @@ def ask(query, df, n_embeddings: int = 5) -> str:
         string_final = str(df["text"][i][:80]).replace("\n", "")
         strings.append(str(df["text"][i]))
         print(
+=======
+	"""Answers a query using GPT and a dataframe of relevant texts and embeddings."""
+	embeddings = df["embedding"]
+	query_embedding = embedding_query(query=query)
+	indices_rankeados, distancias = indice_artigos_rankeados(query_embedding=query_embedding, embeddings=embeddings)
+	k_counter = 0
+	strings = []
+	for i in indices_rankeados:
+		if k_counter >= n_embeddings:
+			break
+		k_counter += 1
+		string_final = str(df["text"][i][:80]).replace("\n", "")
+		strings.append(str(df["text"][i]))
+		print(
+>>>>>>> Stashed changes
             f"""
         --- Embedding de número #{k_counter} (o #{k_counter} mais próximo do query de {n_embeddings}) ---
         Embedding: {string_final}
@@ -121,6 +138,7 @@ for section in formatted_article:
 df = pd.DataFrame({"text": formatted_article, "embedding": embeddings})
 df.to_csv("data/stoicarticle.csv", index=False)"""
 
+<<<<<<< Updated upstream
 if __name__ == "__main__":
     print(
         "Ask any question about Stoicism! I'll be using embeddings from the wikipedia article to answer your question."
@@ -131,3 +149,13 @@ if __name__ == "__main__":
             response = ask(query=query, df=dfstoic, n_embeddings=3)
             print(f"\n{response}")
         print("\nAny other questions?")
+=======
+if __name__ == '__main__':
+	print("Ask any question about Stoicism! I'll be using embeddings from the wikipedia article to answer your question.")
+	while True:
+		query = input("Question: ")
+		if query:
+			response = ask(query=query, df=df_stoicism, n_embeddings=3)
+			print(f"\n{response}")
+		print("\nAny other questions?")
+>>>>>>> Stashed changes
