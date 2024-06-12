@@ -6,6 +6,9 @@ import os  # for environment variables
 import pandas as pd  # for DataFrames to store article sections and embeddings
 import re  # for cutting <ref> links out of Wikipedia articles
 import tiktoken  # for counting tokens
+from dotenv import load_dotenv  # for loading environment variables
+
+load_dotenv()
 
 client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
@@ -86,7 +89,9 @@ def all_subsections_from_section(
         section_text = section_text.split(first_subtitle)[0]
         results = [(titles, section_text)]
         for subsection in section.get_sections(levels=[len(titles) + 1]):
-            results.extend(all_subsections_from_section(subsection, titles, sections_to_ignore))
+            results.extend(
+                all_subsections_from_section(subsection, titles, sections_to_ignore)
+            )
         return results
 
 
@@ -111,10 +116,14 @@ def all_subsections_from_title(
         summary_text = str(parsed_text)
     results = [([title], summary_text)]
     for subsection in parsed_text.get_sections(levels=[2]):
-        results.extend(all_subsections_from_section(subsection, [title], sections_to_ignore))
+        results.extend(
+            all_subsections_from_section(subsection, [title], sections_to_ignore)
+        )
     return results
 
     # clean text
+
+
 def clean_section(section: tuple[list[str], str]) -> tuple[list[str], str]:
     """
     Return a cleaned up section with:
@@ -127,7 +136,8 @@ def clean_section(section: tuple[list[str], str]) -> tuple[list[str], str]:
     return (titles, text)
 
 
-#wikipedia_sections = [clean_section(ws) for ws in wikipedia_sections]
+# wikipedia_sections = [clean_section(ws) for ws in wikipedia_sections]
+
 
 # filter out short/blank sections
 def keep_section(section: tuple[list[str], str]) -> bool:
@@ -137,7 +147,6 @@ def keep_section(section: tuple[list[str], str]) -> bool:
         return False
     else:
         return True
-
 
 
 GPT_MODEL = "gpt-3.5-turbo"  # only matters insofar as it selects which tokenizer to use
@@ -184,7 +193,9 @@ def truncated_string(
     encoded_string = encoding.encode(string)
     truncated_string = encoding.decode(encoded_string[:max_tokens])
     if print_warning and len(encoded_string) > max_tokens:
-        print(f"Warning: Truncated string from {len(encoded_string)} tokens to {max_tokens} tokens.")
+        print(
+            f"Warning: Truncated string from {len(encoded_string)} tokens to {max_tokens} tokens."
+        )
     return truncated_string
 
 
@@ -232,9 +243,6 @@ def split_strings_from_subsection(
     return [truncated_string(string, model=model, max_tokens=max_tokens)]
 
 
-
-
-
 # split pages into sections
 # may take ~1 minute per 100 articles
 wikipedia_sections = []
@@ -243,20 +251,23 @@ for title in titles:
 print(f"Found {len(wikipedia_sections)} sections in {len(titles)} pages.")
 
 
-
-
 original_num_sections = len(wikipedia_sections)
 wikipedia_sections = [ws for ws in wikipedia_sections if keep_section(ws)]
-print(f"Filtered out {original_num_sections-len(wikipedia_sections)} sections, leaving {len(wikipedia_sections)} sections.")
+print(
+    f"Filtered out {original_num_sections-len(wikipedia_sections)} sections, leaving {len(wikipedia_sections)} sections."
+)
 
 
 MAX_TOKENS = 1600
 wikipedia_strings = []
 for section in wikipedia_sections:
-    wikipedia_strings.extend(split_strings_from_subsection(section, max_tokens=MAX_TOKENS))
+    wikipedia_strings.extend(
+        split_strings_from_subsection(section, max_tokens=MAX_TOKENS)
+    )
 
-print(f"{len(wikipedia_sections)} Wikipedia sections split into {len(wikipedia_strings)} strings.")
-
+print(
+    f"{len(wikipedia_sections)} Wikipedia sections split into {len(wikipedia_strings)} strings."
+)
 
 
 EMBEDDING_MODEL = "text-embedding-3-small"
